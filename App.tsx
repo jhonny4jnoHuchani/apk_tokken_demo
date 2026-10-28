@@ -1,20 +1,37 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import './global.css';
+import React, { useState } from 'react';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import LoginScreen from './screens/LoginScreen';
+import TokenScreen from './screens/TokenScreen';
 
-export default function App() {
-  return (
-    <View style={styles.container}>
-      <Text>Open up App.tsx to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
-  );
+interface ActiveSession {
+  identificadorSistema: string;
+  deviceId: string;
+  simulationMode: boolean;
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+export default function App() {
+  const [session, setSession] = useState<ActiveSession | null>(null);
+
+  return (
+    <SafeAreaProvider>
+      {session ? (
+        <TokenScreen
+          identificadorSistema={session.identificadorSistema}
+          initialSimulationMode={session.simulationMode}
+          onLogout={() => setSession(null)}
+        />
+      ) : (
+        <LoginScreen
+          onSuccess={(data) => {
+            setSession({
+              identificadorSistema: data.identificador_sistema,
+              deviceId: data.device_id,
+              simulationMode: data.simulationMode,
+            });
+          }}
+        />
+      )}
+    </SafeAreaProvider>
+  );
+}
